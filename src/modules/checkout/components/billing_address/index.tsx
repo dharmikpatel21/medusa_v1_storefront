@@ -21,6 +21,10 @@ const BillingAddress = ({
       cart?.billing_address?.country_code || countryCode || "",
     "billing_address.province": cart?.billing_address?.province || "",
     "billing_address.phone": cart?.billing_address?.phone || "",
+    "billing_address.metadata.house_number":
+      cart?.billing_address?.metadata?.house_number || "",
+    "billing_address.metadata.complement":
+      cart?.billing_address?.metadata?.complement || "",
   })
 
   useEffect(() => {
@@ -34,6 +38,10 @@ const BillingAddress = ({
       "billing_address.country_code": cart?.billing_address?.country_code || "",
       "billing_address.province": cart?.billing_address?.province || "",
       "billing_address.phone": cart?.billing_address?.phone || "",
+      "billing_address.metadata.house_number":
+        cart?.billing_address?.metadata?.house_number || "",
+      "billing_address.metadata.complement":
+        cart?.billing_address?.metadata?.complement || "",
     })
   }, [cart?.billing_address])
 
@@ -68,10 +76,26 @@ const BillingAddress = ({
           required
         />
         <Input
+          label="House Number"
+          name="billing_address.metadata.house_number"
+          autoComplete="house_number"
+          value={formData["billing_address.metadata.house_number"] as string}
+          onChange={handleChange}
+          required
+        />
+        <Input
           label="Address"
           name="billing_address.address_1"
           autoComplete="address-line1"
           value={formData["billing_address.address_1"]}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          label="complement"
+          name="billing_address.metadata.complement"
+          autoComplete="complement"
+          value={formData["billing_address.metadata.complement"] as string}
           onChange={handleChange}
           required
         />
@@ -91,7 +115,7 @@ const BillingAddress = ({
           required
         />
         <Input
-          label="City"
+          label="Region code (UF)"
           name="billing_address.city"
           autoComplete="address-level2"
           value={formData["billing_address.city"]}
@@ -112,6 +136,7 @@ const BillingAddress = ({
           autoComplete="address-level1"
           value={formData["billing_address.province"]}
           onChange={handleChange}
+          required
         />
         <Input
           label="Phone"

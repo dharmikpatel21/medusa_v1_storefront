@@ -6,6 +6,7 @@ import {
   addShippingMethod,
   completeCart,
   deleteDiscount,
+  getCart,
   setPaymentSession,
   updateCart,
 } from "@/lib/data"
@@ -111,6 +112,9 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
 
   if (!cartId) return { message: "No cartId cookie found" }
 
+  const cart = await getCart(cartId).then((cart) => cart)
+
+  const existingMetadata = cart?.shipping_address?.metadata || {}
   const data = {
     shipping_address: {
       first_name: formData.get("shipping_address.first_name"),
@@ -123,6 +127,11 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       country_code: formData.get("shipping_address.country_code"),
       province: formData.get("shipping_address.province"),
       phone: formData.get("shipping_address.phone"),
+      metadata: {
+        ...existingMetadata,
+        number: formData.get("shipping_address.metadata.house_number"),
+        complement: formData.get("shipping_address.metadata.complement"),
+      },
     },
     email: formData.get("email"),
   } as StorePostCartsCartReq
@@ -143,6 +152,11 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       country_code: formData.get("billing_address.country_code"),
       province: formData.get("billing_address.province"),
       phone: formData.get("billing_address.phone"),
+      metadata: {
+        ...existingMetadata,
+        number: formData.get("billing_address.metadata.house_number"),
+        complement: formData.get("billing_address.metadata.complement"),
+      },
     } as StorePostCartsCartReq
 
   try {

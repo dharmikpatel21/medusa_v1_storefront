@@ -198,3 +198,161 @@ export async function enrichLineItems(
 
   return enrichedItems
 }
+
+export const handlePagbankPayment = async (payload: any) => {
+  console.dir({ payload }, { depth: null })
+
+  try {
+    console.log("Creating payment")
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/payment/pagbank`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    )
+
+    const payment = await response.json()
+    console.log({ payment })
+
+    return payment
+  } catch (e) {
+    console.log({ e })
+    return "Error creating payment"
+  }
+}
+
+export const handlePagbankForm = async (formData: FormData) => {
+  console.log("handlePagbankPayment start")
+
+  console.log("handlePagbankPayment called")
+  const expiryDate = formData.get("Vencimento")
+  const [expMonth, expYear] = (expiryDate as string).split("/")
+  const fullExpYear = `20${expYear}`
+
+  const cardnumber = (formData.get("cardNumber") as string).replace(/\s+/g, "")
+
+  const encrypted = formData.get("encrypted")
+
+  const data = {
+    holderName: formData.get("holderName"),
+    cardNumber: cardnumber,
+    expMonth: expMonth,
+    expYear: fullExpYear,
+    cvv: formData.get("cvv"),
+  }
+
+  console.log({ data })
+
+  const cartId = cookies().get("_medusa_cart_id")?.value
+  console.log({ cartId })
+
+  if (!cartId) {
+    console.log("Missing cart ID")
+    return "Missing cart ID"
+  }
+
+  const payload = {
+    cart_id: cartId,
+    payment_info: {
+      card: {
+        holder: {
+          name: data.holderName,
+        },
+        ...(encrypted
+          ? { encrypted: encrypted }
+          : {
+              number: data.cardNumber,
+              exp_month: data.expMonth,
+              exp_year: data.expYear,
+              security_code: data.cvv,
+            }),
+      },
+    },
+    type: "CREDIT_CARD",
+  }
+
+  const res = await handlePagbankPayment(payload)
+  console.log("handlePagbankPayment ends")
+
+  return res
+}
+
+export const handleBoletoForm = async (formData: { [x: string]: any }) => {
+  console.log("handlePagbankPayment start")
+
+  console.log("handlePagbankPayment called")
+
+  const formatedTaxId = formData.cpf?.replace(/[.,\-\/]/g, "")
+  const data = {
+    tax_id: formatedTaxId,
+  }
+
+  console.log({ data })
+
+  const cartId = cookies().get("_medusa_cart_id")?.value
+  console.log({ cartId })
+
+  if (!cartId) {
+    console.log("Missing cart ID")
+    return "Missing cart ID"
+  }
+
+  const payload = {
+    cart_id: cartId,
+    payment_info: {
+      tax_id: data.tax_id,
+    },
+    type: "BOLETO",
+  }
+
+  const res = await handlePagbankPayment(payload)
+  console.dir({ res }, { depth: null })
+  console.log("handlePagbankPayment ends")
+  if (!res.error) {
+    cookies().delete("_medusa_cart_id")
+  }
+
+  // if (res?.status === "PAID") {
+  //   console.log("placeOrder start")
+  //   await placeOrder()
+  //   console.log("placeOrder ends")
+  // }
+
+  return res
+}
+
+export const handlePixPayment = async () => {
+  console.log("handlePixPagbankPayment start")
+  const cartId = cookies().get("_medusa_cart_id")?.value
+  if (!cartId) {
+    return null
+  }
+  const updated_cart = await getCart(cartId).then((cart) => cart)
+
+  if (
+    updated_cart?.payment_session?.provider_id === "pagbank-pix" &&
+    updated_cart?.payment_session?.data?.qr_codes
+  ) {
+    console.log(updated_cart?.payment_session?.data?.qr_codes)
+    // Handle the case when a valid QR code is available
+    cookies().delete("_medusa_cart_id")
+    return updated_cart
+  } else {
+    throw new Error("No valid QR code found.")
+  }
+
+  // if (res?.status === "PAID") {
+  //   console.log("placeOrder start")
+  //   await placeOrder()
+  //   console.log("placeOrder ends")
+  // }
+}
+
+export const updated_cart = async (cartId: string) => {
+  const updated_cart = await getCart(cartId).then((cart) => cart)
+  return updated_cart
+}

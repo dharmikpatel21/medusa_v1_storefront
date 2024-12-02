@@ -31,6 +31,10 @@ const ShippingAddress = ({
     "shipping_address.province": cart?.shipping_address?.province || "",
     email: cart?.email || "",
     "shipping_address.phone": cart?.shipping_address?.phone || "",
+    "shipping_address.metadata.house_number":
+      cart?.shipping_address?.metadata?.house_number || "",
+    "shipping_address.metadata.complement":
+      cart?.shipping_address?.metadata?.complement || "",
   })
 
   const countriesInRegion = useMemo(
@@ -60,6 +64,10 @@ const ShippingAddress = ({
       "shipping_address.province": cart?.shipping_address?.province || "",
       email: cart?.email || "",
       "shipping_address.phone": cart?.shipping_address?.phone || "",
+      "shipping_address.metadata.house_number":
+        cart?.shipping_address?.metadata?.house_number || "",
+      "shipping_address.metadata.complement":
+        cart?.shipping_address?.metadata?.complement || "",
     })
   }, [cart?.shipping_address, cart?.email])
 
@@ -102,10 +110,26 @@ const ShippingAddress = ({
           required
         />
         <Input
+          label="House Number"
+          name="shipping_address.metadata.house_number"
+          autoComplete="house_number"
+          value={formData["shipping_address.metadata.house_number"] as string}
+          onChange={handleChange}
+          required
+        />
+        <Input
           label="Address"
           name="shipping_address.address_1"
           autoComplete="address-line1"
           value={formData["shipping_address.address_1"]}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          label="complement"
+          name="shipping_address.metadata.complement"
+          autoComplete="complement"
+          value={formData["shipping_address.metadata.complement"] as string}
           onChange={handleChange}
           required
         />
@@ -125,7 +149,7 @@ const ShippingAddress = ({
           required
         />
         <Input
-          label="City"
+          label="Region code (UF)"
           name="shipping_address.city"
           autoComplete="address-level2"
           value={formData["shipping_address.city"]}
@@ -146,6 +170,7 @@ const ShippingAddress = ({
           autoComplete="address-level1"
           value={formData["shipping_address.province"]}
           onChange={handleChange}
+          required
         />
       </div>
       <div className="my-8">
